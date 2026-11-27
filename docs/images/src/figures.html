@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>companion-memory figures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg0: #0a0f1f;
+    --bg1: #121a33;
+    --panel: rgba(255, 255, 255, 0.045);
+    --panel-border: rgba(255, 255, 255, 0.09);
+    --text: #e8ecf7;
+    --muted: #93a0bd;
+    --faint: #5d6886;
+    --teal: #2dd4bf;
+    --violet: #a78bfa;
+    --blue: #60a5fa;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --sans: 'Inter', 'Noto Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'DejaVu Sans Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: var(--sans); color: var(--text); padding: 24px; display: grid; gap: 40px; }
+  .fig {
+    width: 1000px;
+    border-radius: 20px;
+    background:
+      radial-gradient(900px 420px at 0% 0%, rgba(45, 212, 191, 0.13), transparent 60%),
+      radial-gradient(900px 480px at 100% 100%, rgba(167, 139, 250, 0.16), transparent 60%),
+      linear-gradient(160deg, var(--bg1), var(--bg0));
+    padding: 44px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .fig::after { /* faint grid texture */
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 40%, black, transparent 80%);
+  }
+  .fig > * { position: relative; z-index: 1; }
+  .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); }
+  h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin-top: 12px; }
+  h1 .grad { background: linear-gradient(90deg, var(--teal), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); font-size: 16px; margin-top: 10px; max-width: 760px; line-height: 1.5; }
+  h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin-top: 10px; }
+
+  /* ---------- hero ---------- */
+  .flow { display: grid; grid-template-columns: 220px 40px 1fr 40px 230px; align-items: stretch; margin-top: 34px; }
+  .col-title { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }
+  .io { display: flex; flex-direction: column; gap: 10px; }
+  .chip {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px;
+    padding: 11px 14px; font-size: 14px; font-weight: 500;
+  }
+  .chip small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; margin-top: 2px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .arrow { display: flex; align-items: center; justify-content: center; }
+  .arrow svg { width: 30px; height: 30px; opacity: 0.7; }
+  .core { display: flex; flex-direction: column; gap: 14px; }
+  .layer { border-radius: 16px; padding: 18px 20px; border: 1px solid; }
+  .layer.conv { background: rgba(45, 212, 191, 0.07); border-color: rgba(45, 212, 191, 0.35); }
+  .layer.home { background: rgba(167, 139, 250, 0.08); border-color: rgba(167, 139, 250, 0.4); }
+  .layer-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .layer-name { font-size: 16px; font-weight: 700; }
+  .layer-api { font: 500 12px var(--mono); color: var(--muted); }
+  .pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .pill { font-size: 12.5px; font-weight: 500; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+  .layer.conv .pill { color: #b9f5ea; }
+  .layer.home .pill { color: #ddd3ff; }
+  .pill.safety { background: rgba(251, 191, 36, 0.12); border-color: rgba(251, 191, 36, 0.4); color: #fde68a; }
+  .stores { margin-top: 2px; display: flex; gap: 8px; align-items: center; color: var(--muted); font: 500 12px var(--mono); }
+  .stores span { white-space: nowrap; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); color: var(--text); }
+  .foot { display: flex; gap: 22px; margin-top: 30px; color: var(--muted); font-size: 13px; }
+  .foot b { color: var(--text); font-weight: 600; }
+
+  /* ---------- terminal ---------- */
+  .term { background: rgba(5, 8, 18, 0.82); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; margin-top: 26px; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6); }
+  .term-bar { display: flex; align-items: center; gap: 8px; padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .term-bar i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .term-bar .t { margin-left: 10px; font: 500 12.5px var(--mono); color: var(--faint); }
+  pre { font: 400 13.5px/1.62 var(--mono); color: #cfd6e8; padding: 18px 22px 22px; white-space: pre-wrap; }
+  .p { color: var(--green); } .c { color: var(--faint); } .k { color: var(--blue); } .s { color: #fca5a5; }
+  .sg { color: #86efac; } .sa { color: #fcd34d; } .sr { color: #fca5a5; } .h { color: var(--violet); font-weight: 700; }
+  .em { color: var(--text); font-weight: 500; }
+
+  /* ---------- safety gate ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .card { border-radius: 16px; padding: 20px; background: var(--panel); border: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 14px; }
+  .who { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: #0a0f1f; }
+  .who-name { font-weight: 600; font-size: 14px; }
+  .who-meta { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .bubble { background: rgba(255,255,255,0.07); border-radius: 4px 14px 14px 14px; padding: 11px 13px; font-size: 14.5px; line-height: 1.4; }
+  .memory { font: 400 12px/1.5 var(--mono); color: var(--muted); border-left: 2px solid rgba(255,255,255,0.12); padding-left: 10px; }
+  .memory b { color: var(--text); font-weight: 500; }
+  .verdict { margin-top: auto; border-radius: 12px; padding: 13px 14px; border: 1px solid; }
+  .verdict .tag { display: inline-flex; align-items: center; gap: 7px; font: 700 12px var(--mono); letter-spacing: 0.08em; }
+  .verdict p { font-size: 13px; line-height: 1.45; margin-top: 8px; color: var(--text); }
+  .verdict .meta { font: 500 11.5px var(--mono); color: var(--muted); margin-top: 8px; }
+  .allow { background: rgba(52, 211, 153, 0.09); border-color: rgba(52, 211, 153, 0.45); } .allow .tag { color: var(--green); }
+  .confirm { background: rgba(251, 191, 36, 0.09); border-color: rgba(251, 191, 36, 0.45); } .confirm .tag { color: var(--amber); }
+  .deny { background: rgba(248, 113, 113, 0.09); border-color: rgba(248, 113, 113, 0.45); } .deny .tag { color: var(--red); }
+  .note { margin-top: 22px; color: var(--muted); font-size: 13px; }
+  .note code { font-family: var(--mono); color: var(--text); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="fig" id="hero">
+  <div class="eyebrow">open-source · typescript · zero dependencies</div>
+  <h1><span class="grad">companion-memory</span></h1>
+  <p class="sub">Long-term memory for AI characters, companions and household robots: what to remember about each person, and what the agent knows about the home it lives in.</p>
+
+  <div class="flow">
+    <div>
+      <div class="col-title">Inputs</div>
+      <div class="io">
+        <div class="chip"><span class="dot" style="background:var(--teal)"></span><div>Chat turns<small>OpenAI-compatible LLM</small></div></div>
+        <div class="chip"><span class="dot" style="background:var(--blue)"></span><div>Speech + identity<small>voice · face · device scores</small></div></div>
+        <div class="chip"><span class="dot" style="background:var(--violet)"></span><div>Vision<small>object detections at places</small></div></div>
+        <div class="chip"><span class="dot" style="background:var(--amber)"></span><div>Robot tasks<small>activities and events</small></div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#93a0bd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+    <div class="core">
+      <div class="col-title" style="margin-bottom:-2px">Memory</div>
+      <div class="layer conv">
+        <div class="layer-head"><span class="layer-name" style="color:var(--teal)">Conversational memory</span><span class="layer-api">createMemoryEngine()</span></div>
+        <div class="pills">
+          <span class="pill">Fact extraction</span><span class="pill">Dedup · CJK</span><span class="pill">Self-corrections</span>
+          <span class="pill">Story &amp; pins</span><span class="pill">Budgeted recall</span><span class="pill">Relationship</span>
+        </div>
+      </div>
+      <div class="layer home">
+        <div class="layer-head"><span class="layer-name" style="color:var(--violet)">Household memory</span><span class="layer-api">createHomeMemory()</span></div>
+        <div class="pills">
+          <span class="pill">Speaker fusion</span><span class="pill">Access control</span><span class="pill">Places &amp; objects</span>
+          <span class="pill">Episodic timeline</span><span class="pill safety">Safety gate</span><span class="pill">Forget member</span>
+        </div>
+      </div>
+      <div class="stores">stores <span>SQLite</span><span>Cloudflare D1</span><span>in-memory</span><span>your own</span></div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#93a0bd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+    <div>
+      <div class="col-title">Outputs</div>
+      <div class="io">
+        <div class="chip"><span class="dot" style="background:var(--teal)"></span><div>Prompt context<small>scoped to who is speaking</small></div></div>
+        <div class="chip"><span class="dot" style="background:var(--violet)"></span><div>"Where is…?"<small>with age and confidence</small></div></div>
+        <div class="chip"><span class="dot" style="background:var(--blue)"></span><div>"When did we last…?"<small>local-time timeline</small></div></div>
+        <div class="chip"><span class="dot" style="background:var(--amber)"></span><div>allow · confirm · deny<small>before any physical action</small></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot"><span><b>93</b> tests · SQLite + in-memory</span><span><b>MIT</b> licensed</span><span><b>Node 20+</b> · Cloudflare D1 adapter</span></div>
+</section>
+
+<!-- ============ TERMINAL ============ -->
+<section class="fig" id="terminal">
+  <div class="eyebrow">npm run example:home</div>
+  <h2>A household robot, simulated end to end</h2>
+  <div class="term">
+    <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">companion-memory — example:home</span></div>
+<pre><span class="p">$</span> npm run example:home
+
+<span class="c"># Tom says it; voice + face agree it is Tom</span>
+utterance → { speaker: <span class="s">'tom'</span>, placement: { objectId: <span class="s">'pills'</span>, placeId: <span class="s">'bath'</span> } }
+
+where is the mug? → <span class="em">The Blue mug was last seen in Kitchen › Left cabinet 1 day ago (seen by camera, confidence 0.723).</span>
+last mopped → <span class="em">2026-11-27 22:26 · mop_floor · Kitchen · Mopped the kitchen</span>
+
+<span class="c"># Lily (child) asks for Dad's pills</span>
+Lily asks for pills → { decision: <span class="sr">'deny'</span>, risk: <span class="sr">'critical'</span>,
+  reasons: [ <span class="s">'child cannot request a critical-risk action'</span> ], confirmBy: <span class="s">'adult'</span> }
+
+<span class="c"># Tom asks for his own pills</span>
+Tom asks for pills → { decision: <span class="sa">'confirm'</span>, risk: <span class="sr">'critical'</span>,
+  confirmPrompt: <span class="sa">'Before I bring your pill box, please confirm: the Pill box is in
+  Bathroom cabinet (told, 1 hour ago). Is that still correct?'</span> }
+
+<span class="h">--- context for Lily ---</span>
+SPEAKER: Lily (child), identified with confidence 0.873.
+RECENT EVENTS:
+- 2026-11-27 22:26 · mop_floor · Kitchen · Mopped the kitchen
+LOCATION (blue mug): The Blue mug was last seen in Kitchen › Left cabinet 1 day ago …</pre>
+  </div>
+</section>
+
+<!-- ============ SAFETY GATE ============ -->
+<section class="fig" id="gate">
+  <div class="eyebrow" style="color:var(--amber)">checkAction()</div>
+  <h2>Memory is never permission</h2>
+  <p class="sub">Same robot, same memory, three requests. The gate weighs who is asking, what the object is, and how the robot knows where it is.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="who"><div class="avatar" style="background:var(--blue)">T</div><div><div class="who-name">Tom</div><div class="who-meta">owner · identified 0.95</div></div></div>
+      <div class="bubble">"Robo, bring me the blue mug."</div>
+      <div class="memory">mug → <b>Kitchen › Left cabinet</b><br>seen by camera · 1 day ago · conf 0.72</div>
+      <div class="verdict allow"><span class="tag">● ALLOW</span><p>Low-risk object, recent camera sighting.</p><div class="meta">risk: low</div></div>
+    </div>
+    <div class="card">
+      <div class="who"><div class="avatar" style="background:var(--violet)">L</div><div><div class="who-name">Lily</div><div class="who-meta">child · identified 0.87</div></div></div>
+      <div class="bubble">"Can you bring Dad's pills?"</div>
+      <div class="memory">pill box · tags: <b>medication</b><br>location withheld from children</div>
+      <div class="verdict deny"><span class="tag">● DENY</span><p>Child cannot request a critical-risk action.</p><div class="meta">risk: critical · confirm by: adult</div></div>
+    </div>
+    <div class="card">
+      <div class="who"><div class="avatar" style="background:var(--blue)">T</div><div><div class="who-name">Tom</div><div class="who-meta">owner · identified 0.95</div></div></div>
+      <div class="bubble">"Bring me my pills."</div>
+      <div class="memory">pill box → <b>Bathroom cabinet</b><br>told by Tom · 1 hour ago · not observed</div>
+      <div class="verdict confirm"><span class="tag">● CONFIRM</span><p>"Before I bring your pill box, please confirm: the Pill box is in Bathroom cabinet (told, 1 hour ago). Is that still correct?"</p><div class="meta">medication: always re-verify</div></div>
+    </div>
+  </div>
+  <p class="note">Real decisions from <code>npm run example:home</code> with <code>DEFAULT_SAFETY_POLICY</code>.</p>
+</section>
+
+</body>
+</html>

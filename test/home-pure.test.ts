@@ -175,6 +175,9 @@ describe('assessAction', () => {
     expect(stale.decision).toBe('confirm');
     expect(stale.reasons[0]).toContain('stale');
     expect(stale.confirmPrompt).toContain('the mug is in Kitchen');
+    expect(stale.confirmPrompt).toMatch(/^Before I fetch object,/);
+    const worded = assessAction({action: 'fetch_object', description: 'bring the mug', risk: 'medium', evidence: [fresh('observed', 0.95, 10 * 86400)]}, now);
+    expect(worded.confirmPrompt).toMatch(/^Before I bring the mug, please confirm/);
   });
 
   it('always re-verifies medication and requires an adult', () => {

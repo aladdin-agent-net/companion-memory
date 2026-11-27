@@ -24,6 +24,8 @@ export type MemoryEvidence = {
 export type ActionRequest = {
   /** Your action id, e.g. `fetch_object`, `give_medication`, `open_door`. */
   action: string;
+  /** Human wording for the confirmation question, e.g. "bring the pill box". Defaults to the action id. */
+  description?: string;
   /** Explicit risk. Combined with risk derived from safety tags; the higher wins. */
   risk?: ActionRisk;
   /** Who asked for the action. Omit for robot-initiated routines. */
@@ -144,10 +146,11 @@ export function assessAction(request: ActionRequest, now: number, policy: Safety
     atLeast(risk, 'high') ? 'adult'
     : requester?.status === 'identified' ? 'requester'
     : 'anyone';
+  const doing = request.description?.trim() || request.action.replace(/_/g, ' ');
   const confirmPrompt =
     questions.length ?
-      `Before I ${request.action.replace(/_/g, ' ')}, please confirm: ${questions.join('; ')}. Is that still correct?`
-    : `Please confirm that I should ${request.action.replace(/_/g, ' ')}.`;
+      `Before I ${doing}, please confirm: ${questions.join('; ')}. Is that still correct?`
+    : `Please confirm that I should ${doing}.`;
   return {decision: 'confirm', risk, reasons, confirmPrompt, confirmBy};
 }
 

@@ -58,13 +58,18 @@ clock += 3600;
 console.log('\nwhere is the mug? →', (await home.whereIs('blue mug')).answer);
 console.log('last mopped →', (await home.describe([(await home.lastTime('mop_floor'))!]))[0]);
 
-// 6) Lily asks the robot to bring Dad's pills. The safety gate decides.
+// 6) Three requests, one safety gate.
 const lily = await home.identify([{source: 'face', memberId: 'lily', score: 0.97}]);
-const pills = await home.whereIs('pill box');
+const tom = await home.identify([{source: 'device', memberId: 'tom', score: 1}]);
+const mug = await home.whereIs('blue mug', {speaker: tom});
+if (mug.status === 'found') {
+  console.log('\nTom asks for the mug →', home.checkAction({action: 'fetch_object', description: 'bring the blue mug', requester: tom, objectTags: mug.object.safetyTags, evidence: [mug.evidence]}));
+}
+console.log('Lily: where are the pills? →', (await home.whereIs('pill box', {speaker: lily})).answer);
+const pills = await home.whereIs('pill box'); // robot-internal lookup, no speaker
 if (pills.status === 'found') {
-  console.log('\nLily asks for pills →', home.checkAction({action: 'fetch_object', requester: lily, objectTags: pills.object.safetyTags, evidence: [pills.evidence]}));
-  const tom = await home.identify([{source: 'device', memberId: 'tom', score: 1}]);
-  console.log('Tom asks for pills →', home.checkAction({action: 'fetch_object', requester: tom, objectTags: pills.object.safetyTags, evidence: [pills.evidence]}));
+  console.log('Lily asks for pills →', home.checkAction({action: 'fetch_object', description: 'bring the pill box', requester: lily, objectTags: pills.object.safetyTags, evidence: [pills.evidence]}));
+  console.log('Tom asks for pills →', home.checkAction({action: 'fetch_object', description: 'bring your pill box', requester: tom, objectTags: pills.object.safetyTags, evidence: [pills.evidence]}));
 }
 
 // 7) Context for the robot's LLM, scoped to the speaker.

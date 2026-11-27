@@ -1,5 +1,9 @@
 # companion-memory
 
+<p align="center">
+  <img src="docs/images/hero.png" alt="companion-memory: chat, speech, vision and robot task inputs flow into conversational and household memory, which produce speaker-scoped prompt context, location answers, timeline answers and allow / confirm / deny safety decisions" width="900">
+</p>
+
 Long-term memory for AI characters, companions, assistants and **household robots**, in TypeScript with no runtime dependencies.
 
 It answers two questions: **what should the agent remember about each person, and what does it know about the home it lives in?**
@@ -119,6 +123,10 @@ const home = createHomeMemory({
 
 Try it: `npm run example:home`.
 
+<p align="center">
+  <img src="docs/images/terminal.png" alt="Terminal output of npm run example:home: a spoken placement is stored for the identified speaker, the mug location is answered with age and confidence, a child's request for medication is denied, the owner's request needs confirmation, and the child's prompt context contains no personal or sensitive information" width="900">
+</p>
+
 ### What it covers
 
 | Capability | API | Notes |
@@ -134,6 +142,10 @@ Try it: `npm run example:home`.
 | **Privacy and retention** | `forgetMember(id)`, `prune(...)`, `clearHome()` | Right to be forgotten across home and conversational memory; age-based pruning that keeps important episodes. |
 
 All policies (`DEFAULT_SPEAKER_POLICY`, `DEFAULT_SPATIAL_POLICY`, `DEFAULT_SAFETY_POLICY`) are plain objects you can override.
+
+<p align="center">
+  <img src="docs/images/gate.png" alt="Safety gate with three requests: the owner asking for a mug seen by camera is allowed; a child asking for medication is denied; the owner asking for his own medication, whose location he only told the robot, must confirm first" width="900">
+</p>
 
 ### Responsibilities that stay with your robot stack
 
