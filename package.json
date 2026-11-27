@@ -1,7 +1,7 @@
 {
   "name": "companion-memory",
-  "version": "0.1.0",
-  "description": "Long-term memory for AI characters and companions: fact extraction, dedup, corrections, budgeted recall and relationship state.",
+  "version": "0.2.0",
+  "description": "Long-term memory for AI characters, companions and household robots: facts, relationships, speaker-aware access, object locations, episodic timeline and a safety gate.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -21,7 +21,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=20"
@@ -30,7 +31,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "example": "tsx examples/basic.ts"
+    "example": "tsx examples/basic.ts",
+    "example:home": "tsx examples/home-robot.ts"
   },
   "keywords": [
     "llm",
@@ -39,7 +41,11 @@
     "character",
     "companion",
     "chatbot",
-    "long-term-memory"
+    "long-term-memory",
+    "robotics",
+    "embodied-ai",
+    "home-robot",
+    "episodic-memory"
   ],
   "devDependencies": {
     "@types/node": "^22.10.0",

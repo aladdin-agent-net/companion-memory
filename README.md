@@ -1,8 +1,11 @@
 # companion-memory
 
-Long-term memory for AI characters, companions and assistants, in TypeScript with no runtime dependencies.
+Long-term memory for AI characters, companions, assistants and **household robots**, in TypeScript with no runtime dependencies.
 
-It answers one question well: **what should the model remember about this user, and how do I fit it into the prompt?**
+It answers two questions: **what should the agent remember about each person, and what does it know about the home it lives in?**
+
+- **Conversational memory** (`createMemoryEngine`): facts, story, pins and relationship state per user and agent.
+- **Household / embodied memory** (`createHomeMemory`): who is speaking, where things are, what happened when, and whether a physical action that relies on memory is safe to take. See [Household and robot memory](#household-and-robot-memory).
 
 - **Fact extraction**: an LLM pulls durable facts from recent turns (user / character / side characters), backed by deterministic rules for the most common facts. It still works when the LLM is down.
 - **Noise filtering and dedup**: drops "lol" and "I'm tired today"; merges paraphrases (stemmed token overlap, CJK bigrams).
@@ -91,22 +94,70 @@ new SqlStore(fromD1(env.DB));                     // Cloudflare D1 (run SCHEMA_S
 
 Implement `MemoryStore` for anything else (Postgres, Redis, ...). `beginExtraction` must be atomic; `decideExtraction` gives you the shared policy.
 
+## Household and robot memory
+
+`createHomeMemory` adds the memory a home robot needs on top of the conversational engine. Everything is scoped by `homeId`; each member's personal memory stays in the core engine under `{userId: memberId, agentId: robotId}`.
+
+```ts
+import {createHomeMemory, createMemoryEngine, SqlHomeStore, SqlStore, fromNodeSqlite} from 'companion-memory';
+
+const driver = fromNodeSqlite(new DatabaseSync('home.db'));
+const homeStore = new SqlHomeStore(driver);
+const coreStore = new SqlStore(driver);
+await homeStore.migrate();
+await coreStore.migrate();
+
+const home = createHomeMemory({
+  homeId: 'home-1',
+  robotId: 'robo-1',
+  robotName: 'Robo',
+  store: homeStore,
+  memory: createMemoryEngine({store: coreStore, llm}),
+  utcOffsetMinutes: 480, // the home's time zone, for "today" / "yesterday"
+});
+```
+
+Try it: `npm run example:home`.
+
+### What it covers
+
+| Capability | API | Notes |
+|---|---|---|
+| **Speaker identification (fusion)** | `identify(signals)` | Fuses scores from *your* voice / face / device / self-introduction models (weighted noisy-OR) into `identified` / `ambiguous` / `unknown`. A shared name ("Tom") is never trusted on its own. This library does not do biometrics. |
+| **Access control** | `memoryAccessFor(speaker)` | Unknown speakers get household read-only access and nothing personal. Personal memory is read and written only for the identified member. |
+| **Spatial and object memory** | `upsertPlace`, `upsertObject`, `ingest({type: 'object_seen'})`, `whereIs(query, {speaker})` | Place hierarchy from your map (`mapRef` links to your map frame). Current location decays with age (half-life); told and inferred reports weigh less than observations; habitual location ("usually in the cupboard"); "my keys" prefers the speaker's own object. |
+| **Sensitive locations** | `whereIs(query, {speaker})` | Locations of medication, hazardous, child-restricted and valuable items are withheld from children, guests and unidentified people. |
+| **Episodic memory** | `recordEpisode`, `episodes({range, labels, actorId, placeId, objectId, text})`, `lastTime(label)` | Timeline of tasks, activities, events and presence; local-time ranges (`today`, `yesterday`, `this_week`, ...); presence sightings merge into visits. |
+| **Safety gate** | `checkAction({action, requester, objectTags, evidence})` | Memory is never permission. Returns `allow` / `confirm` / `deny`, reasons, a confirmation question and who may confirm. Medication / allergens / hazardous items are always re-verified; children and guests cannot request high-risk actions; hearsay is not enough for high-risk actions; stale or low-confidence evidence needs confirmation. |
+| **Multimodal input** | `ingest(observation)` | `object_seen` (vision), `placement_told` (your NLU), `utterance` (ASR text + identity signals; parses simple English placements and runs fact extraction for the identified speaker), `person_seen`, `activity` (task system). |
+| **Prompt context** | `buildContext({speaker, objectQueries})` | Speaker identity, that member's memory, household facts, recent events, requested locations, and rules for the robot's LLM. |
+| **Privacy and retention** | `forgetMember(id)`, `prune(...)`, `clearHome()` | Right to be forgotten across home and conversational memory; age-based pruning that keeps important episodes. |
+
+All policies (`DEFAULT_SPEAKER_POLICY`, `DEFAULT_SPATIAL_POLICY`, `DEFAULT_SAFETY_POLICY`) are plain objects you can override.
+
+### Responsibilities that stay with your robot stack
+
+This library is the memory and policy layer. For a commercial deployment you still own:
+
+- **Perception and biometrics**: voice / face recognition, object detection, localization. Feed their outputs into `ingest` and `identify`.
+- **Calibration**: the default thresholds are sensible starting points, not tuned on your sensors. Measure false-accept rates for speaker identification and tune `DEFAULT_SPEAKER_POLICY` before relying on it.
+- **Final action safety**: `checkAction` is one gate before motion planning, not a replacement for your robot's functional-safety system.
+- **Data protection**: encrypt the database at rest, and get consent for storing household members' data under your jurisdiction's rules.
+
 ## Limitations (honest list)
 
 - Recall is **recency-based**, not semantic. With hundreds of facts per user, you will want embeddings or a reranker; the `factLimit` / budget hooks are where to plug that in.
 - The deterministic rules and correction patterns are **English**. Other languages rely on the LLM (dedup does handle CJK).
 - Corrections are pattern-based ("no longer", "quit", "stopped", "... anymore"); subtle contradictions are left to the LLM's "skip unless changed" instruction.
-- Extraction quality depends on your model. 7B+ instruction models work; tiny models produce more junk (filtered, but not perfectly).
+- Extraction quality depends on your model. Tiny models produce more junk (filtered, but not perfectly).
+- `parsePlacementStatement` understands simple English only ("I put my keys on the hall table"). For other languages, parse in your NLU and send `placement_told`.
+- Object and place name matching is lexical (names, aliases, light singularization), not semantic.
 
 ## Roadmap
 
-- **Now:** memory for chat characters, companions and assistants.
-- **Next:** embodied and home-robot use cases. The same per-user, per-agent memory as a personality and memory layer for household robots, adding:
-  - episodic memory on a timeline ("what happened when"), with time-based retrieval;
-  - multiple household members behind one robot (speaker-aware memory);
-  - safety gating, so remembered facts never drive physical actions without re-confirmation;
-  - non-text sources (speech, vision, observed behavior) feeding facts.
-- **Later:** pluggable semantic retrieval (embeddings / reranker) for large memories.
+- **Done (0.1):** conversational memory for characters, companions and assistants.
+- **Done (0.2):** household / embodied memory: speaker fusion and access control, spatial and object memory, episodic timeline, safety gate, multimodal ingest.
+- **Next:** pluggable semantic retrieval (embeddings / reranker) for facts, objects and episodes; multilingual placement parsing; a ROS 2 bridge example.
 
 Feedback on these directions is welcome in issues.
 

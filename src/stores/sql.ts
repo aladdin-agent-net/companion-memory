@@ -8,6 +8,7 @@ import {
   type MemoryStore,
 } from '../store.js';
 import type {Fact, FactScope, NewFact, Pin, RelationshipStage, RelationshipState, Role} from '../types.js';
+import {runMigrations, splitStatements} from './migrations.js';
 
 /** Minimal async SQL interface. Adapters for node:sqlite / better-sqlite3 and Cloudflare D1 are below. */
 export interface SqlDriver {
@@ -123,11 +124,9 @@ export class SqlStore implements MemoryStore {
     this.now = options.now ?? (() => Math.floor(Date.now() / 1000));
   }
 
-  /** Create tables if missing. Safe to call on every boot. */
-  async migrate(): Promise<void> {
-    for (const statement of SCHEMA_SQL.split(';').map(s => s.trim()).filter(Boolean)) {
-      await this.sql.run(statement);
-    }
+  /** Create or upgrade tables. Safe to call on every boot. Returns the migrations applied now. */
+  async migrate(): Promise<string[]> {
+    return runMigrations(this.sql, [{name: 'core-001', statements: splitStatements(SCHEMA_SQL)}]);
   }
 
   async getStory(key: MemoryKey) {

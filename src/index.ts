@@ -10,3 +10,6 @@ export * from './llm.js';
 export * from './engine.js';
 export {InMemoryStore} from './stores/in-memory.js';
 export {SqlStore, SCHEMA_SQL, fromNodeSqlite, fromD1, type SqlDriver} from './stores/sql.js';
+export {runMigrations, type Migration} from './stores/migrations.js';
+export * from './errors.js';
+export * from './home/index.js';
