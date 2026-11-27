@@ -13,7 +13,7 @@ It answers one question well: **what should the model remember about this user, 
 - **Shared persona**: facts saved under a shared agent id (e.g. "user is vegetarian") are known by every agent of that user.
 - **Pluggable storage and model**: in-memory, SQLite (`node:sqlite`, `better-sqlite3`), Cloudflare D1, or your own `MemoryStore`; any OpenAI-compatible endpoint (OpenAI, vLLM, Ollama, LM Studio, OpenRouter, LiteLLM).
 
-Originally built for a production AI-character chat product, then extracted and cleaned up.
+Extracted from an AI-character chat app I built, then cleaned up into a standalone library.
 
 ## Install
 
