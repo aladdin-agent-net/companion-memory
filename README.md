@@ -98,6 +98,18 @@ Implement `MemoryStore` for anything else (Postgres, Redis, ...). `beginExtracti
 - Corrections are pattern-based ("no longer", "quit", "stopped", "... anymore"); subtle contradictions are left to the LLM's "skip unless changed" instruction.
 - Extraction quality depends on your model. 7B+ instruction models work; tiny models produce more junk (filtered, but not perfectly).
 
+## Roadmap
+
+- **Now:** memory for chat characters, companions and assistants.
+- **Next:** embodied and home-robot use cases. The same per-user, per-agent memory as a personality and memory layer for household robots, adding:
+  - episodic memory on a timeline ("what happened when"), with time-based retrieval;
+  - multiple household members behind one robot (speaker-aware memory);
+  - safety gating, so remembered facts never drive physical actions without re-confirmation;
+  - non-text sources (speech, vision, observed behavior) feeding facts.
+- **Later:** pluggable semantic retrieval (embeddings / reranker) for large memories.
+
+Feedback on these directions is welcome in issues.
+
 ## Development
 
 ```bash
